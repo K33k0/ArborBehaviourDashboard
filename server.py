@@ -3,10 +3,13 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 from pathlib import Path
+from html import escape
 from datetime import datetime, timedelta
 from threading import Lock
 from time import monotonic
 import argparse
+import base64
+import binascii
 import json
 import re
 import math
@@ -49,10 +52,28 @@ def load_config():
         if not isinstance(url, str) or not url.startswith('https://') or not isinstance(auth, str) or not auth.startswith('Basic '):
             raise SystemExit(f'Invalid URL or Basic authorisation for feeds.{name}.')
         feeds[name] = {'url': url, 'auth': auth}
-    return host, port, feeds
+    logo_base64 = settings.get('logo_base64')
+    logo = None
+    if logo_base64 is not None:
+        try:
+            logo = base64.b64decode(logo_base64, validate=True)
+        except (ValueError, TypeError, binascii.Error):
+            raise SystemExit('config.json logo_base64 must contain a base64-encoded PNG.')
+        if not logo.startswith(b'\x89PNG\r\n\x1a\n'):
+            raise SystemExit('config.json logo_base64 must contain a base64-encoded PNG.')
+    school_name = settings.get('school_name', 'School')
+    ethos = settings.get('ethos', '')
+    if not isinstance(school_name, str) or not school_name.strip() or not isinstance(ethos, str):
+        raise SystemExit('config.json school_name must be non-empty text and ethos must be text.')
+    return host, port, feeds, logo, school_name, ethos
 
 
-HOST, PORT, FEEDS = load_config()
+HOST, PORT, FEEDS, LOGO, SCHOOL_NAME, ETHOS = load_config()
+BRANDING = {
+    'SCHOOL_NAME': escape(SCHOOL_NAME),
+    'SCHOOL_INITIAL': escape(SCHOOL_NAME.strip()[0].upper()),
+    'ETHOS': escape(ETHOS),
+}
 
 # Independent cached data per feed. Lock ensures concurrent browsers cannot
 # trigger duplicate requests. After failure, the last successful data remains.
@@ -210,7 +231,7 @@ def get_dashboard(kind):
                 request = Request(config['url'], headers={
                     'Authorization': config['auth'],
                     'Accept': 'application/json',
-                    'User-Agent': 'OrmeSchoolLeaderboard/2.0'
+                    'User-Agent': 'SchoolLeaderboard/2.0'
                 })
                 with urlopen(request, timeout=30) as response:
                     payload = json.load(response)
@@ -244,13 +265,23 @@ class Handler(BaseHTTPRequestHandler):
         elif path == '/styles.css':
             self.serve('styles.css', 'text/css; charset=utf-8')
         elif path == '/logo.png':
-            self.serve('logo.png', 'image/png')
+            if LOGO is None:
+                self.serve('logo.png', 'image/png')
+            else:
+                self.reply(LOGO, 'image/png')
         else:
             self.send_error(404)
 
     def serve(self, name, mime):
         try:
-            self.reply((ROOT / name).read_bytes(), mime)
+            path = ROOT / name
+            if name == 'index.html':
+                template = path.read_text(encoding='utf-8')
+                content = re.sub(r'\{\{(SCHOOL_NAME|SCHOOL_INITIAL|ETHOS)\}\}',
+                                 lambda match: BRANDING[match[1]], template).encode('utf-8')
+            else:
+                content = path.read_bytes()
+            self.reply(content, mime)
         except OSError:
             self.send_error(404)
 

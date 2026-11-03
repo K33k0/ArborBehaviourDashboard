@@ -1,10 +1,10 @@
 
 @echo off
-title Orme Academy Dashboard
+title School Dashboard
 cd /d "%~dp0"
 
 echo ========================================
-echo   THE ORME ACADEMY - LIVE DASHBOARD
+echo   SCHOOL LEADERBOARD - LIVE DASHBOARD
 echo ========================================
 echo.
 
