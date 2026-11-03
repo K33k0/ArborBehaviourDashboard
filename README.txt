@@ -1,4 +1,4 @@
-Orme Academy Dashboard — Python standard library only
+School Leaderboard Dashboard — Python standard library only
 
 1. Open config.json and replace the example feed URLs and the Basic authorisation value.
 2. If a feed has its own authorisation, add an "authorization" value inside that feed's object.
@@ -24,3 +24,8 @@ Security: config.json contains credentials. Keep it on a trusted machine, restri
 The default 127.0.0.1 host is local-only. Do not change to 0.0.0.0 without appropriately securing network access and reviewing the data-sharing policy.
 
 The separate config.example.json is a reusable placeholder.
+Set school_name and ethos in config.json to brand the dashboard.
+Set the optional logo_base64 key in config.json to a base64-encoded PNG.
+The server reads it on startup and uses logo.png when the key is absent.
+
+Licence: PolyForm Noncommercial 1.0.0. See LICENSE and NOTICE.
