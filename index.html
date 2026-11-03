@@ -27,11 +27,17 @@
     <button type="button" class="tab active" data-type="ace" aria-selected="true">★ ACE leaderboard</button>
     <button type="button" class="tab" data-type="atl" aria-selected="false">✦ AtL leaderboard</button>
     <button type="button" class="tab" data-type="attendance" aria-selected="false">◷ Attendance leaderboard</button>
-    <label class="rotate-control" for="auto-rotate" title="Automatically switch leaderboards every 30 seconds">
-      <span>Auto-rotate <span class="rotate-interval">30s</span></span>
-      <input type="checkbox" id="auto-rotate" role="switch" checked aria-label="Automatically rotate leaderboards every 30 seconds">
+    <label class="rotate-control" for="auto-rotate">
+      <span>Auto-rotate</span>
+      <input type="checkbox" id="auto-rotate" role="switch" checked>
       <span class="rotate-switch" aria-hidden="true"></span>
     </label>
+    <select id="rotation-speed" aria-label="Rotation interval">
+      <option value="15">15s</option>
+      <option value="30" selected>30s</option>
+      <option value="60">60s</option>
+    </select>
+    <button type="button" id="fullscreen">Fullscreen</button>
   </nav>
   <main>
     <div class="board-heading"><span>YEAR GROUP RANKINGS · BEST FIRST</span><span id="metric-description">RANKED BY ACE POINTS PER PUPIL <span class="mini-gold">●</span> TOP FORM</span></div>

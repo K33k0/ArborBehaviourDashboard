@@ -2,11 +2,29 @@
 
 const $ = id => document.getElementById(id);
 
+function readLocal(key, fallback) {
+  try {
+    return JSON.parse(localStorage.getItem(key)) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeLocal(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // The dashboard still works when browser storage is unavailable.
+  }
+}
+
+const preferences = readLocal('orme-display', {});
 const state = {
-  active: 'ace',
+  active: ['ace', 'atl', 'attendance'].includes(preferences.tab) ? preferences.tab : 'ace',
   ace: null,
   atl: null,
-  attendance: null
+  attendance_form: null,
+  attendance_year: null
 };
 
 const config = {
@@ -32,7 +50,6 @@ const config = {
 
 // AtL chart: best form = 100%, worst form = 70%.
 const MIN_ATL_BAR = 70;
-const ROTATION_MS = 30_000;
 const REFRESH_MS = 60_000;
 
 function el(tag, className, text) {
@@ -53,7 +70,30 @@ function hasScore(row, type) {
   if (type === 'attendance') return average >= 0 && average <= 100;
   return type === 'ace'
     ? Number(row.pupils) > 0
-    : Number(row.awards) > 0 && average > 0;
+    : Number(row.awards) > 0;
+}
+
+function formKey(row) {
+  return JSON.stringify([row.year, row.form]);
+}
+
+function trackMovement(feed, data) {
+  const day = data.updated?.slice(0, 10);
+  if (!day) return;
+  const type = feed === 'attendance_form' ? 'attendance' : feed;
+  const date = new Date(day + 'T12:00:00Z');
+  const weekday = date.getUTCDay();
+  const key = 'orme-history-' + feed;
+  const history = readLocal(key, {});
+  if (!data.stale && weekday >= 1 && weekday <= 5) {
+    history[day] = Object.fromEntries(data.groups.filter(row => hasScore(row, type))
+      .map(row => [formKey(row), Number(row.average)]));
+    const recent = Object.keys(history).sort().slice(-7);
+    writeLocal(key, Object.fromEntries(recent.map(item => [item, history[item]])));
+  }
+  if (weekday < 1 || weekday > 5) return;
+  date.setUTCDate(date.getUTCDate() - (weekday === 1 ? 3 : 1));
+  data.previous = history[date.toISOString().slice(0, 10)];
 }
 
 function calculateYearAverage(rows, type) {
@@ -99,11 +139,14 @@ function calculateBarWidth(row, type, values) {
   return Math.max(MIN_ATL_BAR, Math.min(100, percentage));
 }
 
-function drawBoards(groups, type, yearGroups = []) {
+function drawBoards(groups, type, yearGroups = [], previous = {}) {
   const byYear = new Map();
   for (const row of groups) {
     if (!byYear.has(row.year)) byYear.set(row.year, []);
     byYear.get(row.year).push(row);
+  }
+  for (const row of yearGroups) {
+    if (!byYear.has(row.year)) byYear.set(row.year, []);
   }
 
   const years = [...byYear].map(([year, rows]) => ({
@@ -137,7 +180,7 @@ function drawBoards(groups, type, yearGroups = []) {
     const label = el('div', 'year-label');
     const topLine = el('div', 'year-topline');
     topLine.append(
-      el('span', 'year-rank', `#${yearIndex + 1}`),
+      el('span', 'year-rank', group.average === null ? '—' : `#${yearIndex + 1}`),
       el('span', 'year-small', 'YEAR GROUP')
     );
     label.append(topLine, el('div', 'year-number', `Year ${group.year}`));
@@ -150,12 +193,15 @@ function drawBoards(groups, type, yearGroups = []) {
     label.append(score, el('div', 'leader', `Top form: ${topForm}`));
 
     const list = el('div', 'form-list');
+    if (!rows.length) list.append(el('div', 'loading', 'Form results unavailable'));
     rows.forEach((row, i) => {
       const valid = hasScore(row, type);
       const line = el('div', 'form-row');
+      const name = el('div', 'form-name', row.form);
+      name.title = row.form;
       line.append(
         el('div', 'form-rank', valid ? String(i + 1) : '—'),
-        el('div', 'form-name', row.form)
+        name
       );
 
       const track = el('div', 'bar-track');
@@ -164,12 +210,19 @@ function drawBoards(groups, type, yearGroups = []) {
       fill.style.setProperty('--pct', `${pct}%`);
       track.append(fill);
 
-      line.append(track, el('div', 'form-value', valid ? number(row.average, type) : '—'));
-      line.title = type === 'ace'
-        ? `${row.form}: ${row.points} ACE points / ${row.pupils} pupils`
-        : type === 'atl'
-          ? `${row.form}: ${row.points} AtL points / ${row.awards} awards`
-          : `${row.form}: ${number(row.average, type)} weekly attendance`; 
+      const noAwards = type === 'atl' && row.awards === 0;
+      const value = el('div', 'form-value', valid ? number(row.average, type) : noAwards ? 'No awards yet' : '—');
+      const prior = previous[formKey(row)];
+      if (valid && Number.isFinite(prior)) {
+        const precision = type === 'atl' ? 3 : type === 'attendance' ? 1 : 2;
+        const delta = Number((row.average - prior).toFixed(precision));
+        if (delta) {
+          const movement = el('span', 'movement', `${delta > 0 ? '+' : '−'}${Math.abs(delta).toFixed(precision)}${type === 'attendance' ? 'pp' : ''}`);
+          movement.title = 'Score change since the previous weekday';
+          value.append(movement);
+        }
+      }
+      line.append(track, value);
       list.append(line);
     });
 
@@ -180,18 +233,21 @@ function drawBoards(groups, type, yearGroups = []) {
   const boards = $('boards');
   boards.replaceChildren(fragment);
   boards.style.gridTemplateRows = years.length
-    ? years.map(year => `minmax(0, ${year.rows.length + 2}fr)`).join(' ')
+    ? years.map(year => `minmax(${Math.max(82, year.rows.length * 19 + 12)}px, ${year.rows.length + 2}fr)`).join(' ')
     : '1fr';
 
   boards.querySelectorAll('.year-board').forEach((section, i) => {
     section.querySelector('.form-list').style.gridTemplateRows =
-      `repeat(${years[i].rows.length}, minmax(0, 1fr))`;
+      `repeat(${Math.max(1, years[i].rows.length)}, minmax(18px, 1fr))`;
   });
 }
 
 function render() {
   const type = state.active;
-  const data = state[type];
+  const formFeed = state[type === 'attendance' ? 'attendance_form' : type];
+  const yearFeed = type === 'attendance' ? state.attendance_year : null;
+  const groups = formFeed?.groups ?? [];
+  const years = yearFeed?.groups ?? [];
   const info = config[type];
 
   $('page-title').replaceChildren(
@@ -207,7 +263,7 @@ function render() {
     button.setAttribute('aria-selected', String(active));
   });
 
-  if (!data || !data.groups?.length) {
+  if (!groups.length && !years.length) {
     $('boards').replaceChildren(el(
       'div', 'loading',
       'No ' + info.label + ' data available yet. Check the Python console.'
@@ -219,51 +275,56 @@ function render() {
     return;
   }
 
-  drawBoards(data.groups, type, data.years || []);
-  $('status').textContent = data.stale
-    ? 'Showing previous results'
-    : info.label + ' data up to date';
-  $('status').parentElement.classList.toggle('error', Boolean(data.stale));
-  $('updated').textContent = data.updated
-    ? `Arbor refreshed ${new Date(data.updated).toLocaleString('en-GB', {
-        dateStyle: 'medium', timeStyle: 'short'
-      })}`
-    : 'Waiting for first update';
+  drawBoards(groups, type, years, formFeed?.previous);
+  const feeds = type === 'attendance' ? [['Forms', formFeed], ['Years', yearFeed]] : [[info.label, formFeed]];
+  const current = feeds.every(([, feed]) => feed?.updated && !feed.stale);
+  $('status').textContent = current ? info.label + ' data up to date' : 'Some results are stale or unavailable';
+  $('status').parentElement.classList.toggle('error', !current);
+  $('updated').textContent = feeds.map(([label, feed]) => {
+    if (!feed?.updated) return label + ' unavailable';
+    const time = new Date(feed.updated).toLocaleString('en-GB', {
+      dateStyle: 'medium', timeStyle: 'short'
+    });
+    return `${label} ${time}${feed.stale ? ' (stale)' : ''}`;
+  }).join(' · ');
 }
 
-async function fetchOne(type) {
+async function fetchOne(feed) {
   try {
-    const endpoints = type === 'attendance'
-      ? ['/api/attendance_form', '/api/attendance_year']
-      : ['/api/' + type];
-    const results = await Promise.all(endpoints.map(async endpoint => {
-      const response = await fetch(endpoint, { cache: 'no-store' });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const json = await response.json();
-      if (!Array.isArray(json.groups)) throw new Error('Invalid response from ' + endpoint);
-      return json;
-    }));
-    state[type] = type === 'attendance'
-      ? { groups: results[0].groups, years: results[1].groups,
-          stale: results.some(r => r.stale),
-          updated: results.map(r => r.updated).filter(Boolean).sort()[0] || null }
-      : results[0];
+    const response = await fetch('/api/' + feed, {
+      cache: 'no-store', signal: AbortSignal.timeout(45_000)
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    if (!Array.isArray(data.groups)) throw new Error('Invalid response from ' + feed);
+    if (feed !== 'attendance_year') trackMovement(feed, data);
+    state[feed] = data.updated || !state[feed]?.updated ? data : { ...state[feed], stale: true };
   } catch (error) {
-    console.error(type + ' update failed:', error);
-    if (state[type]) state[type].stale = true;
+    console.error(feed + ' update failed:', error);
+    if (state[feed]) state[feed].stale = true;
   }
-  if (type === state.active) render();
+  if (feed === state.active || (state.active === 'attendance' && feed.startsWith('attendance_'))) render();
 }
 
 function refresh() {
   // Python controls :15/:45 Arbor fetches; browser checks cached results.
-  return Promise.all([fetchOne('ace'), fetchOne('atl'), fetchOne('attendance')]);
+  return Promise.all(['ace', 'atl', 'attendance_form', 'attendance_year'].map(fetchOne));
 }
 
-// Rotation affects only the visible leaderboard, never Arbor data refreshes.
-// Default: enabled. Switch state is not persisted across page reloads.
 let rotationTimer = null;
 const autoRotate = $('auto-rotate');
+const rotationSpeed = $('rotation-speed');
+const fullscreen = $('fullscreen');
+autoRotate.checked = preferences.autoRotate !== false;
+rotationSpeed.value = ['15', '30', '60'].includes(preferences.speed) ? preferences.speed : '30';
+
+function savePreferences() {
+  writeLocal('orme-display', {
+    tab: preferences.tab,
+    autoRotate: autoRotate.checked,
+    speed: rotationSpeed.value
+  });
+}
 
 function rotateTab() {
   const order = ['ace', 'atl', 'attendance'];
@@ -275,20 +336,41 @@ function restartRotation() {
   clearInterval(rotationTimer);
   rotationTimer = null;
   if (autoRotate.checked) {
-    rotationTimer = setInterval(rotateTab, ROTATION_MS);
+    rotationTimer = setInterval(rotateTab, Number(rotationSpeed.value) * 1000);
   }
 }
 
-autoRotate.addEventListener('change', restartRotation);
+for (const control of [autoRotate, rotationSpeed]) {
+  control.addEventListener('change', () => {
+    savePreferences();
+    restartRotation();
+  });
+}
+
+fullscreen.hidden = !document.fullscreenEnabled;
+fullscreen.addEventListener('click', async () => {
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else await document.documentElement.requestFullscreen();
+  } catch (error) {
+    fullscreen.title = 'Fullscreen unavailable: ' + error.message;
+  }
+});
+document.addEventListener('fullscreenchange', () => {
+  fullscreen.textContent = document.fullscreenElement ? 'Exit fullscreen' : 'Fullscreen';
+});
 
 document.querySelectorAll('.tab').forEach(button => {
   button.addEventListener('click', () => {
     state.active = button.dataset.type;
+    preferences.tab = state.active;
+    savePreferences();
     render();
     restartRotation(); // Manual selection gets a full 30 seconds if enabled.
   });
 });
 
+render();
 refresh();
 setInterval(refresh, REFRESH_MS);
 restartRotation();

@@ -5,9 +5,12 @@ from urllib.error import HTTPError, URLError
 from pathlib import Path
 from datetime import datetime, timedelta
 from threading import Lock
+from time import monotonic
+import argparse
 import json
 import re
 import math
+import webbrowser
 
 ROOT = Path(__file__).resolve().parent
 CONFIG_PATH = ROOT / 'config.json'
@@ -54,7 +57,7 @@ HOST, PORT, FEEDS = load_config()
 # Independent cached data per feed. Lock ensures concurrent browsers cannot
 # trigger duplicate requests. After failure, the last successful data remains.
 locks = {name: Lock() for name in FEEDS}
-caches = {name: {'slot': None, 'groups': [], 'updated': None, 'error': None} for name in FEEDS}
+caches = {name: {'slot': None, 'retry_at': 0, 'groups': [], 'updated': None, 'error': None} for name in FEEDS}
 
 
 def slot_start(now):
@@ -201,8 +204,7 @@ def get_dashboard(kind):
     with locks[kind]:
         cache = caches[kind]
         slot = slot_start(datetime.now().astimezone()).isoformat()
-        if cache['slot'] != slot:
-            cache['slot'] = slot  # At most one attempt per :15/:45 window.
+        if cache['slot'] != slot and monotonic() >= cache['retry_at']:
             try:
                 config = FEEDS[kind]
                 request = Request(config['url'], headers={
@@ -216,10 +218,13 @@ def get_dashboard(kind):
                 cache['groups'] = groups
                 cache['updated'] = datetime.now().astimezone().isoformat(timespec='seconds')
                 cache['error'] = None
+                cache['slot'] = slot
+                cache['retry_at'] = 0
                 print(f'Updated {kind.upper()}: {len(groups)} forms at {cache["updated"]}')
             except (HTTPError, URLError, TimeoutError, ValueError, TypeError,
                     KeyError, json.JSONDecodeError) as exc:
                 cache['error'] = type(exc).__name__ + ': ' + str(exc)
+                cache['retry_at'] = monotonic() + 60
                 print(f'{kind.upper()} update failed:', cache['error'])
         return {'updated': cache['updated'], 'stale': cache['error'] is not None,
                 'groups': cache['groups'],
@@ -260,10 +265,16 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--open-browser', action='store_true')
+    args = parser.parse_args()
     server = ThreadingHTTPServer((HOST, PORT), Handler)
-    print(f'ACE + AtL + Attendance dashboard: http://{HOST}:{PORT}')
-    print('One Arbor fetch per feed, per :15/:45 window, when requested.')
+    browser_host = '127.0.0.1' if HOST == '0.0.0.0' else HOST
+    dashboard_url = f'http://{browser_host}:{PORT}'
+    print(f'ACE + AtL + Attendance dashboard: {dashboard_url}')
     try:
+        if args.open_browser:
+            webbrowser.open(dashboard_url)
         server.serve_forever()
     except KeyboardInterrupt:
         pass

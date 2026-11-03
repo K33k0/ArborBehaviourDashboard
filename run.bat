@@ -17,9 +17,7 @@ if not exist "server.py" (
 echo Starting dashboard...
 echo.
 
-start "" "http://127.0.0.1:3000"
-
-python server.py
+python server.py --open-browser
 
 if errorlevel 1 (
     echo.

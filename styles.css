@@ -69,7 +69,7 @@ h1 { font-size: clamp(24px,2vw,32px); }
 .updated { margin-top: 4px; font-size: 10px; }
 main { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
 .board-heading { flex: 0 0 auto; margin: 7px 0 6px; font-size: 9px; }
-.boards { flex: 1 1 auto; min-height: 0; display: grid; gap: 5px; }
+.boards { flex: 1 1 auto; min-height: 0; display: grid; gap: 5px; overflow: auto; }
 .year-board {
   min-height: 0; overflow: hidden;
   display: grid; grid-template-columns: 155px minmax(0, 1fr);
@@ -84,15 +84,16 @@ main { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
 .year-score strong { font-size: clamp(18px,1.65vw,23px); }
 .leader { font-size: 10px; }
 .form-list { min-height: 0; display: grid; gap: 1px; }
-.form-row { min-height: 0; height: 100%; grid-template-columns: 20px 76px minmax(0,1fr) 57px; gap: 7px; }
+.form-row { min-height: 0; height: 100%; grid-template-columns: 20px 76px minmax(0,1fr) minmax(96px, max-content); gap: 7px; }
 .form-rank { font-size: 11px; }
-.form-name { font-size: 12px; white-space: nowrap; }
-.form-value { font-size: 12px; }
+.form-name { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.form-value { font-size: 12px; white-space: nowrap; }
+.movement { margin-left: 7px; color: #a6b9d4; font-size: .85em; }
 .bar-track { height: min(12px, 65%); min-height: 6px; align-self: center; }
 footer { flex: 0 0 auto; padding-top: 5px; font-size: 10px; }
 @media(max-width:750px) {
  .year-board { grid-template-columns: 105px minmax(0, 1fr); gap: 6px; padding: 4px 6px; }
- .form-row { grid-template-columns: 15px 44px minmax(0,1fr) 40px; gap: 4px; }
+ .form-row { grid-template-columns: 15px 44px minmax(0,1fr) minmax(78px, max-content); gap: 4px; }
  .form-name,.form-value { font-size: 10px; }
  .year-number { font-size: 20px; }
 }
@@ -102,20 +103,18 @@ footer { flex: 0 0 auto; padding-top: 5px; font-size: 10px; }
 .school-mark img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .school-mark img[hidden], .school-mark .logo-fallback[hidden] { display: none !important; }
 .school-mark .logo-fallback { font-weight: 850; font-size: 24px; }
-footer span:last-child { white-space: nowrap; }
 /* ACE / AtL mode tabs, inside the fixed viewport budget */
-.tabs{display:flex;gap:7px;flex:0 0 auto;padding:7px 0 0}
-.tab{font:inherit;font-weight:750;font-size:12px;color:#9fb3d1;cursor:pointer;padding:6px 15px;border-radius:7px;border:1px solid #34475f;background:#142238}
+.tabs{display:flex;flex-wrap:wrap;gap:7px;flex:0 0 auto;padding:7px 0 0}
+.tab,#rotation-speed,#fullscreen{font:inherit;font-weight:750;font-size:12px;color:#bed0ec;cursor:pointer;padding:6px 12px;border-radius:7px;border:1px solid #34475f;background:#142238}
 .tab.active{background:#355ca2;border-color:#688ee4;color:#fff}
 .tab:focus-visible{outline:2px solid #ffc66a;outline-offset:2px}
 
 /* On-screen rotation control, sharing the tab row (no additional height). */
 .rotate-control{margin-left:auto;display:inline-flex;align-items:center;gap:10px;cursor:pointer;color:#bed0ec;font-size:12px;font-weight:700;white-space:nowrap;user-select:none;min-height:28px}
-.rotate-interval{font-weight:500;color:#7f97b9;margin-left:3px}
 .rotate-control input{position:absolute;opacity:0;width:1px;height:1px}
 .rotate-switch{position:relative;display:inline-block;width:40px;height:22px;flex:none;border-radius:999px;background:#34465f;border:1px solid #52627b;transition:background .15s}
 .rotate-switch:after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#d9e4f5;transition:transform .15s}
 .rotate-control input:checked + .rotate-switch{background:#315fb8;border-color:#6c98f1}
 .rotate-control input:checked + .rotate-switch:after{transform:translateX(18px);background:white}
 .rotate-control input:focus-visible + .rotate-switch{outline:2px solid #ffd36f;outline-offset:3px}
-@media(max-width:760px){.rotate-control{font-size:11px;gap:6px}.rotate-interval{display:none}}
+@media(max-width:760px){.rotate-control{font-size:11px;gap:6px;margin-left:0}}
