@@ -37,7 +37,7 @@ const config = {
   atl: {
     label: 'AtL',
     subtitle: 'Average AtL score per award · This week · Lower is better',
-    detail: 'RANKED BY LOWEST AVERAGE AtL · TOP FORM',
+    detail: 'LOWER AtL IS BETTER',
     unit: 'AtL average'
   },
   attendance: {
@@ -231,7 +231,7 @@ function drawBoards(groups, type, yearGroups = [], previous = {}) {
           value.append(movement);
         }
       }
-      line.append(track, value);
+      line.append(value, track);
       list.append(line);
     });
 
@@ -273,7 +273,7 @@ function render() {
   document.querySelectorAll('.tab').forEach(button => {
     const active = button.dataset.type === type;
     button.classList.toggle('active', active);
-    button.setAttribute('aria-selected', String(active));
+    button.setAttribute('aria-pressed', String(active));
   });
 
   if (!groups.length && !years.length) {
@@ -291,9 +291,14 @@ function render() {
   }
 
   drawBoards(groups, type, years, formFeed?.previous);
+  if ($('boards').querySelector('.movement')) {
+    $('metric-description').textContent += ' · Change vs previous weekday';
+  }
   const feeds = type === 'attendance' ? [['Forms', formFeed], ['Years', yearFeed]] : [[info.label, formFeed]];
   const current = feeds.every(([, feed]) => feed?.updated && !feed.stale);
-  $('status').textContent = current ? info.label + ' data up to date' : 'Some results are stale or unavailable';
+  $('status').textContent = current ? info.label + ' data up to date' : feeds
+    .filter(([, feed]) => !feed?.updated || feed.stale)
+    .map(([label, feed]) => label + (feed?.updated ? ' delayed' : ' unavailable')).join(' · ');
   $('status').parentElement.classList.toggle('error', !current);
   $('updated').textContent = feeds.map(([label, feed]) => {
     if (!feed?.updated) return label + ' unavailable';

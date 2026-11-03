@@ -19,14 +19,14 @@
       </div>
     </div>
     <div class="header-right">
-      <div class="live"><span class="live-dot"></span><span id="status">Connecting to Arbor…</span></div>
+      <div class="live"><span class="live-dot"></span><span id="status" role="status">Connecting to Arbor…</span></div>
       <div id="updated" class="updated">Waiting for first update</div>
     </div>
   </header>
   <nav class="tabs" aria-label="Leaderboard category">
-    <button type="button" class="tab active" data-type="ace" aria-selected="true">★ ACE leaderboard</button>
-    <button type="button" class="tab" data-type="atl" aria-selected="false">✦ AtL leaderboard</button>
-    <button type="button" class="tab" data-type="attendance" aria-selected="false">◷ Attendance leaderboard</button>
+    <button type="button" class="tab active" data-type="ace" aria-pressed="true">★ ACE leaderboard</button>
+    <button type="button" class="tab" data-type="atl" aria-pressed="false">✦ AtL leaderboard</button>
+    <button type="button" class="tab" data-type="attendance" aria-pressed="false">◷ Attendance leaderboard</button>
     <label class="rotate-control" for="auto-rotate">
       <span>Auto-rotate</span>
       <input type="checkbox" id="auto-rotate" role="switch" checked>
@@ -42,7 +42,7 @@
   <main>
     <div class="board-heading"><span>YEAR GROUP RANKINGS · BEST FIRST</span><span id="metric-description">RANKED BY ACE POINTS PER PUPIL <span class="mini-gold">●</span> TOP FORM</span></div>
     <div id="board-viewport" class="board-viewport">
-      <div id="boards" class="boards" aria-live="polite"><div class="loading">Loading form results…</div></div>
+      <div id="boards" class="boards"><div class="loading">Loading form results…</div></div>
     </div>
   </main>
   <footer><span>{{ETHOS}}</span><span>Arbor updates :15 and :45 <span class="footer-dot">·</span> Created by Mr Wynne</span></footer>

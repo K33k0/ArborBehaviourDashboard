@@ -86,18 +86,24 @@ main { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
 .year-score strong { font-size: clamp(18px,1.65vw,23px); }
 .leader { font-size: 10px; }
 .form-list { min-height: 0; display: grid; gap: 1px; }
-.form-row { min-height: 0; height: 100%; grid-template-columns: 20px 76px minmax(0,1fr) minmax(96px, max-content); gap: 7px; }
+.form-row { min-height: 0; height: 100%; grid-template-columns: 20px 76px 120px minmax(0,1fr); gap: 7px; }
 .form-rank { font-size: 11px; }
 .form-name { font-size: 15px; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.form-value { font-size: 14px; line-height: 1; white-space: nowrap; }
+.form-value { font-size: 14px; line-height: 1; white-space: nowrap; text-align: left; }
 .movement { margin-left: 7px; color: #a6b9d4; font-size: .85em; }
 .bar-track { height: min(12px, 65%); min-height: 6px; align-self: center; }
 footer { flex: 0 0 auto; padding-top: 5px; font-size: 10px; }
 @media(max-width:750px) {
  .year-board { grid-template-columns: 105px minmax(0, 1fr); gap: 6px; padding: 4px 6px; }
- .form-row { grid-template-columns: 15px 44px minmax(0,1fr) minmax(78px, max-content); gap: 4px; }
+ .form-row { grid-template-columns: 15px 48px 98px minmax(0,1fr); gap: 4px; }
  .form-name,.form-value { font-size: 12px; }
  .year-number { font-size: 20px; }
+}
+
+@media(max-width:460px) {
+  .year-label { flex-direction: column; align-items: flex-start; justify-content: center; border-bottom: 0; border-right: 1px solid #31425a; padding-bottom: 0; }
+  .year-board { grid-template-columns: 92px minmax(0,1fr); }
+  .board-heading #metric-description { display: inline; text-align: right; }
 }
 
 /* Branding: official local logo if available; O fallback otherwise. */
