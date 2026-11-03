@@ -69,7 +69,8 @@ h1 { font-size: clamp(24px,2vw,32px); }
 .updated { margin-top: 4px; font-size: 10px; }
 main { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
 .board-heading { flex: 0 0 auto; margin: 7px 0 6px; font-size: 9px; }
-.boards { flex: 1 1 auto; min-height: 0; display: grid; gap: 5px; overflow: auto; }
+.board-viewport { flex: 1 1 auto; min-height: 0; display: flex; overflow: hidden; }
+.boards { flex: 1 1 auto; min-width: 0; min-height: 0; display: grid; gap: 5px; }
 .year-board {
   min-height: 0; overflow: hidden;
   display: grid; grid-template-columns: 155px minmax(0, 1fr);

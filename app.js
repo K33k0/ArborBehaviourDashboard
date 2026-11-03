@@ -139,6 +139,15 @@ function calculateBarWidth(row, type, values) {
   return Math.max(MIN_ATL_BAR, Math.min(100, percentage));
 }
 
+let minimumBoardHeight = 0;
+
+function fitBoards() {
+  const viewport = $('board-viewport');
+  const scale = Math.min(1, viewport.clientWidth / 320,
+    viewport.clientHeight / Math.max(1, minimumBoardHeight));
+  $('boards').style.zoom = scale > 0 ? String(scale) : '1';
+}
+
 function drawBoards(groups, type, yearGroups = [], previous = {}) {
   const byYear = new Map();
   for (const row of groups) {
@@ -231,15 +240,19 @@ function drawBoards(groups, type, yearGroups = [], previous = {}) {
   });
 
   const boards = $('boards');
+  const minimumHeights = years.map(year => Math.max(82, year.rows.length * 19 + 12));
+  minimumBoardHeight = minimumHeights.reduce((total, height) => total + height, 0)
+    + Math.max(0, years.length - 1) * 5;
   boards.replaceChildren(fragment);
   boards.style.gridTemplateRows = years.length
-    ? years.map(year => `minmax(${Math.max(82, year.rows.length * 19 + 12)}px, ${year.rows.length + 2}fr)`).join(' ')
+    ? years.map((year, i) => `minmax(${minimumHeights[i]}px, ${year.rows.length + 2}fr)`).join(' ')
     : '1fr';
 
   boards.querySelectorAll('.year-board').forEach((section, i) => {
     section.querySelector('.form-list').style.gridTemplateRows =
       `repeat(${Math.max(1, years[i].rows.length)}, minmax(18px, 1fr))`;
   });
+  fitBoards();
 }
 
 function render() {
@@ -269,6 +282,8 @@ function render() {
       'No ' + info.label + ' data available yet. Check the Python console.'
     ));
     $('boards').style.gridTemplateRows = '1fr';
+    minimumBoardHeight = 0;
+    fitBoards();
     $('status').textContent = 'Waiting for ' + info.label + ' data';
     $('status').parentElement.classList.add('error');
     $('updated').textContent = 'No successful update';
@@ -370,6 +385,7 @@ document.querySelectorAll('.tab').forEach(button => {
   });
 });
 
+new ResizeObserver(fitBoards).observe($('board-viewport'));
 render();
 refresh();
 setInterval(refresh, REFRESH_MS);

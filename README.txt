@@ -13,7 +13,7 @@ All four feeds are cached separately, and browsers receive only aggregated resul
 On Windows, run.bat starts the server and opens the configured address.
 The browser remembers the last manually selected leaderboard, auto-rotation,
 and the rotation interval. Fullscreen uses the available display area. The
-leaderboard area scrolls when the viewport is too short for all forms.
+boards scale down on shorter displays to keep all forms visible together.
 
 The small signed numbers beside form scores show score movement since the
 previous weekday. Attendance movement is in percentage points (pp). The
