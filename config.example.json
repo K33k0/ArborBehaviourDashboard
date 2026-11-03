@@ -1,0 +1,26 @@
+{
+  "school_name": "Your school name",
+  "ethos": "Your school ethos",
+  "server": {
+    "host": "127.0.0.1",
+    "port": 3000
+  },
+  "feeds": {
+    "ace": {
+      "url": "https://example.invalid/arbor/ace",
+      "authorization": "Basic REPLACE_ME"
+    },
+    "atl": {
+      "url": "https://example.invalid/arbor/atl",
+      "authorization": "Basic REPLACE_ME"
+    },
+    "attendance_form": {
+      "url": "https://example.invalid/arbor/attendance_form",
+      "authorization": "Basic REPLACE_ME"
+    },
+    "attendance_year": {
+      "url": "https://example.invalid/arbor/attendance_year",
+      "authorization": "Basic REPLACE_ME"
+    }
+  }
+}

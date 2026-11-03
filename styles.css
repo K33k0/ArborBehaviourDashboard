@@ -1,0 +1,121 @@
+:root{font-family:Inter,ui-sans-serif,system-ui,"Segoe UI",Arial,sans-serif;color:#eef3ff;background:#081220;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 100% -10%,#213454 0,transparent 30%),#081220}
+.shell{width:min(1600px,100%);margin:auto;padding:clamp(18px,2.5vw,38px) clamp(20px,3vw,52px) 24px}
+.header{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-bottom:21px;border-bottom:1px solid #283750}
+.brand{display:flex;align-items:center;gap:19px}.school-mark{display:grid;place-items:center;width:58px;height:58px;border:2px solid #4e7ad2;border-radius:16px;color:#bcd2fc;font-size:30px;font-weight:850;background:#172942;box-shadow:0 0 30px #4075ff12}
+.eyebrow{font-size:11px;letter-spacing:.19em;font-weight:800;color:#9db5d6;margin:0 0 6px}.dot{color:#517ef4;margin:0 7px}h1{font-size:clamp(27px,2.7vw,42px);line-height:1.08;letter-spacing:-.04em;margin:0;font-weight:850}h1 span{font-weight:450;color:#ccdaf1}.subtitle{margin:7px 0 0;color:#9faec4;font-size:14px}.subtitle span{margin:0 8px;color:#5b7396}
+.header-right{text-align:right;align-self:center}.live{display:inline-flex;align-items:center;gap:9px;background:#13253b;border:1px solid #304760;border-radius:999px;padding:8px 14px;font-size:13px;color:#a7d9bb;font-weight:700}.live-dot{width:7px;height:7px;background:#54d39a;border-radius:100%;box-shadow:0 0 12px #54d39a}.live.error{color:#ffc988}.live.error .live-dot{background:#f7b569}.updated{font-size:12px;color:#8094af;margin-top:9px}
+.board-heading{display:flex;justify-content:space-between;gap:12px;margin:22px 0 13px;color:#8fa7c7;font-size:11px;letter-spacing:.15em;font-weight:750}.mini-gold{color:#f5c467;margin:0 4px}
+.boards{display:grid;gap:12px}.year-board{display:grid;grid-template-columns:minmax(105px,170px) minmax(0,1fr);gap:18px;align-items:stretch;padding:15px 20px;background:linear-gradient(100deg,#121f34,#101a2a);border:1px solid #253850;border-radius:15px;box-shadow:0 8px 18px #00000016}.year-label{border-right:1px solid #31425a;display:flex;flex-direction:column;justify-content:center;gap:5px;padding-right:15px}.year-small{font-size:12px;font-weight:750;color:#8aa9d5;letter-spacing:.15em}.year-number{font-size:clamp(32px,3.1vw,53px);font-weight:850;letter-spacing:-.06em;line-height:1}.leader{font-size:12px;color:#8b9eba;margin-top:6px}.leader strong{color:#f5c467;font-weight:850}
+.form-list{display:grid;gap:6px;min-width:0}.form-row{display:grid;grid-template-columns:62px minmax(0,1fr) 60px;gap:10px;align-items:center;min-height:20px}.form-name{font-size:13px;font-weight:750;color:#b9c8df;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bar-track{height:13px;background:#263951;border-radius:4px;overflow:hidden}.bar-fill{width:var(--pct);height:100%;border-radius:4px;background:linear-gradient(90deg,#4265b8,#7499e1)}.form-row:first-child .bar-fill{background:linear-gradient(90deg,#cd8d2f,#ffd36f)}.form-row:first-child .form-name,.form-row:first-child .form-value{color:#ffdc8d}.form-value{font-variant-numeric:tabular-nums;text-align:right;font-weight:750;font-size:14px;color:#d9e6fa}
+.loading{padding:80px 20px;text-align:center;color:#98abc6}.empty{font-size:14px;color:#91a4bc}footer{display:flex;justify-content:space-between;gap:12px;color:#657d9a;font-size:12px;padding-top:16px}.footer-dot{padding:0 6px}
+@media(max-width:750px){.header{align-items:flex-start}.school-mark{display:none}.header-right{max-width:135px}.live{font-size:11px;padding:7px}.eyebrow{font-size:9px}.year-board{grid-template-columns:80px minmax(0,1fr);gap:10px;padding:12px}.year-number{font-size:31px}.form-row{grid-template-columns:48px minmax(0,1fr) 45px;gap:6px}.form-name,.form-value{font-size:11px}.year-label{padding-right:6px}.leader{font-size:10px}footer{font-size:10px}}
+@media(max-width:460px){.header{flex-direction:column}.header-right{text-align:left}.board-heading span:last-child{display:none}.year-board{grid-template-columns:1fr}.year-label{border-right:0;border-bottom:1px solid #31425a;padding-bottom:8px;flex-direction:row;align-items:baseline;justify-content:start;gap:10px}.year-number{font-size:25px}.leader{margin:0}}
+
+/* Ranked year groups and numbered form positions */
+.year-board.winning-year{border-color:#91723b;background:linear-gradient(105deg,#2b2a27,#152338 46%,#101a2a)}
+.year-topline{display:flex;align-items:center;gap:9px}
+.year-rank{display:inline-block;min-width:39px;text-align:center;padding:4px 7px;background:#28466a;color:#e4eeff;border:1px solid #46638a;border-radius:7px;font-size:15px;font-weight:850}
+.winning-year .year-rank{background:#b57c27;color:#101827;border-color:#f3c46d}
+.year-score{font-size:12px;color:#9cb4d1;line-height:1.5}
+.year-score strong{font-size:clamp(22px,2vw,30px);color:#f5f8ff;font-variant-numeric:tabular-nums}
+.winning-year .year-score strong{color:#ffda87}
+.year-number{font-size:clamp(24px,2.5vw,38px);letter-spacing:-.035em}
+.form-row{grid-template-columns:22px 62px minmax(0,1fr) 60px}
+.form-rank{font-size:12px;color:#91a6c2;text-align:center;font-weight:800}
+.form-row:first-child .form-rank{color:#ffdc8d}
+@media(max-width:750px){.form-row{grid-template-columns:17px 48px minmax(0,1fr) 45px}.year-rank{font-size:12px;min-width:30px}.year-topline{gap:5px}.year-small{font-size:9px}}
+
+/* Full-screen TV mode: compact spacing, no year-group or form truncation. */
+html, body { width: 100%; margin: 0; }
+.shell { width: 100%; max-width: none; padding: 14px 22px 10px; transform-origin: top left; }
+.header { padding-bottom: 10px; }
+.school-mark { width: 46px; height: 46px; font-size: 25px; }
+.brand { gap: 12px; }
+h1 { font-size: 31px; }
+.subtitle { margin-top: 2px; font-size: 12px; }
+.board-heading { margin: 10px 0 7px; font-size: 10px; }
+.boards { gap: 7px; }
+.year-board { padding: 8px 13px; gap: 12px; grid-template-columns: minmax(140px, 185px) minmax(0, 1fr); border-radius: 9px; }
+.year-number { font-size: 29px; }
+.year-score strong { font-size: 22px; }
+.year-label { gap: 2px; }
+.leader { margin-top: 0; }
+.form-list { gap: 2px; }
+.form-row { min-height: 18px; grid-template-columns: 21px 70px minmax(0, 1fr) 52px; gap: 9px; }
+.form-name { overflow: visible; text-overflow: clip; }
+.bar-track { height: 12px; }
+footer { padding-top: 9px; }
+/* If viewport is exceptionally constrained we scale everything, never drop a row. */
+@media (max-width: 750px) { .year-board { grid-template-columns: 110px minmax(0,1fr); } .form-row { grid-template-columns: 18px 50px minmax(0,1fr) 44px; } }
+
+/* V4: True viewport layout. Never zoom the whole page. */
+html, body { height: 100%; overflow: hidden; }
+.shell {
+  height: 100vh; height: 100dvh;
+  display: flex; flex-direction: column;
+  width: 100%; max-width: none;
+  padding: 9px 16px 7px;
+  overflow: hidden;
+  zoom: 1 !important;
+  transform: none !important;
+}
+.header { flex: 0 0 auto; padding-bottom: 7px; }
+.school-mark { width: 40px; height: 40px; font-size: 23px; }
+h1 { font-size: clamp(24px,2vw,32px); }
+.subtitle { font-size: 11px; margin-top: 1px; }
+.eyebrow { font-size: 10px; margin-bottom: 3px; }
+.header-right .live { padding: 5px 10px; font-size: 11px; }
+.updated { margin-top: 4px; font-size: 10px; }
+main { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.board-heading { flex: 0 0 auto; margin: 7px 0 6px; font-size: 9px; }
+.boards { flex: 1 1 auto; min-height: 0; display: grid; gap: 5px; }
+.year-board {
+  min-height: 0; overflow: hidden;
+  display: grid; grid-template-columns: 155px minmax(0, 1fr);
+  gap: 12px; padding: 5px 12px; border-radius: 8px;
+}
+.year-label { min-height: 0; padding-right: 10px; gap: 2px; }
+.year-topline { gap: 6px; }
+.year-rank { font-size: 12px; padding: 2px 5px; min-width: 30px; }
+.year-small { font-size: 9px; }
+.year-number { font-size: clamp(20px, 2vw, 28px); }
+.year-score { font-size: 10px; }
+.year-score strong { font-size: clamp(18px,1.65vw,23px); }
+.leader { font-size: 10px; }
+.form-list { min-height: 0; display: grid; gap: 1px; }
+.form-row { min-height: 0; height: 100%; grid-template-columns: 20px 76px minmax(0,1fr) 57px; gap: 7px; }
+.form-rank { font-size: 11px; }
+.form-name { font-size: 12px; white-space: nowrap; }
+.form-value { font-size: 12px; }
+.bar-track { height: min(12px, 65%); min-height: 6px; align-self: center; }
+footer { flex: 0 0 auto; padding-top: 5px; font-size: 10px; }
+@media(max-width:750px) {
+ .year-board { grid-template-columns: 105px minmax(0, 1fr); gap: 6px; padding: 4px 6px; }
+ .form-row { grid-template-columns: 15px 44px minmax(0,1fr) 40px; gap: 4px; }
+ .form-name,.form-value { font-size: 10px; }
+ .year-number { font-size: 20px; }
+}
+
+/* Branding: official local logo if available; O fallback otherwise. */
+.school-mark { flex: 0 0 42px; width: 42px; height: 42px; overflow: hidden; border-radius: 7px; }
+.school-mark img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.school-mark img[hidden], .school-mark .logo-fallback[hidden] { display: none !important; }
+.school-mark .logo-fallback { font-weight: 850; font-size: 24px; }
+footer span:last-child { white-space: nowrap; }
+/* ACE / AtL mode tabs, inside the fixed viewport budget */
+.tabs{display:flex;gap:7px;flex:0 0 auto;padding:7px 0 0}
+.tab{font:inherit;font-weight:750;font-size:12px;color:#9fb3d1;cursor:pointer;padding:6px 15px;border-radius:7px;border:1px solid #34475f;background:#142238}
+.tab.active{background:#355ca2;border-color:#688ee4;color:#fff}
+.tab:focus-visible{outline:2px solid #ffc66a;outline-offset:2px}
+
+/* On-screen rotation control, sharing the tab row (no additional height). */
+.rotate-control{margin-left:auto;display:inline-flex;align-items:center;gap:10px;cursor:pointer;color:#bed0ec;font-size:12px;font-weight:700;white-space:nowrap;user-select:none;min-height:28px}
+.rotate-interval{font-weight:500;color:#7f97b9;margin-left:3px}
+.rotate-control input{position:absolute;opacity:0;width:1px;height:1px}
+.rotate-switch{position:relative;display:inline-block;width:40px;height:22px;flex:none;border-radius:999px;background:#34465f;border:1px solid #52627b;transition:background .15s}
+.rotate-switch:after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#d9e4f5;transition:transform .15s}
+.rotate-control input:checked + .rotate-switch{background:#315fb8;border-color:#6c98f1}
+.rotate-control input:checked + .rotate-switch:after{transform:translateX(18px);background:white}
+.rotate-control input:focus-visible + .rotate-switch{outline:2px solid #ffd36f;outline-offset:3px}
+@media(max-width:760px){.rotate-control{font-size:11px;gap:6px}.rotate-interval{display:none}}
