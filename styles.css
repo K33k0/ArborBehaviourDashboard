@@ -106,6 +106,27 @@ footer { flex: 0 0 auto; padding-top: 5px; font-size: 10px; }
   .board-heading #metric-description { display: inline; text-align: right; }
 }
 
+/* A brief foil-like reflection across the credit, followed by a quiet pause. */
+.creator-credit { display: inline-block; color: #657d9a; }
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  .creator-credit {
+    background-image: linear-gradient(110deg, #657d9a 40%, #9ebecb 45%, #f5dfb3 48%, #ffffff 50%, #c4d9f4 52%, #9ebecb 55%, #657d9a 60%);
+    background-size: 300% 100%;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: credit-shimmer 10s ease-in-out infinite;
+  }
+}
+@keyframes credit-shimmer {
+  0%, 75% { background-position: 100% 0; }
+  95%, 100% { background-position: 0% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .creator-credit { animation: none; }
+}
+
 /* Branding: official local logo if available; O fallback otherwise. */
 .school-mark { flex: 0 0 34px; width: 34px; height: 34px; overflow: hidden; border-radius: 7px; }
 .school-mark img { display: block; width: 100%; height: 100%; object-fit: contain; }
