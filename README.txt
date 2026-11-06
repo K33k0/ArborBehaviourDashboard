@@ -5,6 +5,12 @@ School Leaderboard Dashboard — Python standard library only
 3. Run: python server.py
 4. Open http://127.0.0.1:3000 (or your configured host and port).
 
+Dedicated display routes: /ace, /atl, and /attendance (for example,
+http://127.0.0.1:3000/ace). Each stays on its selected leaderboard and hides
+all options and the footer. Titles, metric explanations, rankings, and update
+status remain visible. These routes refresh only their relevant feeds.
+The main / dashboard retains its controls and optional auto-rotation.
+
 Refresh: At :15 and :45, the first browser request to each endpoint triggers a fetch.
 The server keeps the last successful feed result if a fetch fails and retries
 on the next browser poll after a 60-second cooldown.

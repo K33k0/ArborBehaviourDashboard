@@ -19,8 +19,11 @@ function writeLocal(key, value) {
 }
 
 const preferences = readLocal('orme-display', {});
+const routeType = window.location.pathname.replace(/^\/+|\/+$/g, '');
+const displayType = ['ace', 'atl', 'attendance'].includes(routeType) ? routeType : null;
+if (displayType) document.body.classList.add('display-only');
 const state = {
-  active: ['ace', 'atl', 'attendance'].includes(preferences.tab) ? preferences.tab : 'ace',
+  active: displayType || (['ace', 'atl', 'attendance'].includes(preferences.tab) ? preferences.tab : 'ace'),
   ace: null,
   atl: null,
   attendance_form: null,
@@ -262,6 +265,7 @@ function render() {
   const groups = formFeed?.groups ?? [];
   const years = yearFeed?.groups ?? [];
   const info = config[type];
+  document.title = info.label + ' Form Leaderboard | ' + document.querySelector('.school-mark').getAttribute('aria-label').replace(/ logo$/, '');
 
   $('page-title').replaceChildren(
     document.createTextNode(info.label + ' '),
@@ -328,7 +332,10 @@ async function fetchOne(feed) {
 
 function refresh() {
   // Python controls :15/:45 Arbor fetches; browser checks cached results.
-  return Promise.all(['ace', 'atl', 'attendance_form', 'attendance_year'].map(fetchOne));
+  const feeds = displayType
+    ? (displayType === 'attendance' ? ['attendance_form', 'attendance_year'] : [displayType])
+    : ['ace', 'atl', 'attendance_form', 'attendance_year'];
+  return Promise.all(feeds.map(fetchOne));
 }
 
 let rotationTimer = null;
@@ -355,7 +362,7 @@ function rotateTab() {
 function restartRotation() {
   clearInterval(rotationTimer);
   rotationTimer = null;
-  if (autoRotate.checked) {
+  if (!displayType && autoRotate.checked) {
     rotationTimer = setInterval(rotateTab, Number(rotationSpeed.value) * 1000);
   }
 }

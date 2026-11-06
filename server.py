@@ -258,7 +258,8 @@ class Handler(BaseHTTPRequestHandler):
         if path in ('/api/ace', '/api/atl', '/api/attendance_form', '/api/attendance_year'):
             kind = path.rsplit('/', 1)[-1]
             self.reply(json.dumps(get_dashboard(kind), allow_nan=False).encode('utf-8'), 'application/json; charset=utf-8')
-        elif path in ('/', '/index.html'):
+        elif path in ('/', '/index.html', '/ace', '/ace/', '/atl', '/atl/',
+                      '/attendance', '/attendance/'):
             self.serve('index.html', 'text/html; charset=utf-8')
         elif path == '/app.js':
             self.serve('app.js', 'text/javascript; charset=utf-8')

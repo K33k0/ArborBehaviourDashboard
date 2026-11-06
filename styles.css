@@ -1,4 +1,6 @@
 :root{font-family:Inter,ui-sans-serif,system-ui,"Segoe UI",Arial,sans-serif;color:#eef3ff;background:#081220;font-synthesis:none}
+/* Dedicated display routes retain context while giving all spare space to results. */
+body.display-only .tabs, body.display-only footer { display: none; }
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 100% -10%,#213454 0,transparent 30%),#081220}
 .shell{width:min(1600px,100%);margin:auto;padding:clamp(18px,2.5vw,38px) clamp(20px,3vw,52px) 24px}
 .header{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-bottom:21px;border-bottom:1px solid #283750}
